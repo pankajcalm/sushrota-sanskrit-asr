@@ -1,0 +1,103 @@
+<!doctype html><html lang="sa"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Su-shrotā · Annotation</title>
+<style>
+ :root{--bg:#faf7f0;--card:#fff;--ink:#2a2622;--mut:#8a8175;--line:#e7e0d3;--accent:#9a6b3f;--ok:#3d7a4e}
+ *{box-sizing:border-box}
+ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Serif",Georgia,serif;-webkit-text-size-adjust:100%}
+ .wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+ header{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+ h1{font-size:20px;margin:0;font-weight:600}
+ .sub{color:var(--mut);font-size:13px}
+ .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0}
+ .bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+ .meta{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;margin-bottom:6px}
+ .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+ audio{width:100%;margin:6px 0 14px}
+ .lbl{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+ #txt{width:100%;min-height:120px;font:400 22px/1.7 "Noto Serif Devanagari","Noto Serif",serif;color:var(--ink);
+      border:1px solid var(--line);border-radius:10px;padding:12px;background:#fffdf8;resize:vertical}
+ #txt:focus{outline:none;border-color:var(--accent)}
+ .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+ button{font:600 15px/1 inherit;border:0;border-radius:10px;padding:13px 20px;cursor:pointer}
+ .save{background:var(--accent);color:#fff;flex:1;min-width:160px}
+ .save:active{transform:translateY(1px)}
+ .ghost{background:transparent;border:1px solid var(--line);color:var(--mut)}
+ .hint{color:var(--mut);font-size:13px;margin-top:10px}
+ .gate{max-width:420px;margin:60px auto;text-align:center}
+ .gate input{font:400 18px inherit;padding:12px 14px;border:1px solid var(--line);border-radius:10px;width:100%;margin:14px 0;background:#fffdf8}
+ .done{text-align:center;color:var(--ok);font-size:18px;padding:40px 0}
+ .tag{font-size:11px;color:var(--mut);background:#f2ece0;border-radius:6px;padding:2px 7px}
+</style></head>
+<body>
+<div class="wrap">
+  <div id="gate" class="gate" style="display:none">
+    <h1>सुश्रोता · Annotation</h1>
+    <p class="sub">Correct the Sanskrit so it exactly matches what is spoken. Please enter your name.</p>
+    <input id="name" placeholder="your name" autocomplete="name">
+    <button class="save" style="width:100%" onclick="enter()">Begin</button>
+  </div>
+
+  <div id="app" style="display:none">
+    <header>
+      <h1>सुश्रोता</h1><span class="sub">annotation · <b id="who"></b></span>
+    </header>
+    <div class="meta"><span id="prog">–</span><span id="mine"></span></div>
+    <div class="bar"><i id="fill"></i></div>
+
+    <div id="stage" class="card">
+      <div class="meta"><span class="tag" id="vid"></span><span class="sub" id="dur"></span></div>
+      <audio id="au" controls preload="auto"></audio>
+      <div class="lbl">correct the text — fix every syllable to match the audio</div>
+      <textarea id="txt" spellcheck="false" dir="auto"></textarea>
+      <div class="row">
+        <button class="save" onclick="saveNext()">Save &amp; Next ⏎</button>
+        <button class="ghost" onclick="markUnclear()">Skip — unclear / not Sanskrit</button>
+      </div>
+      <div class="hint">Fix the text to match the audio exactly. <b>Skip</b> if the audio is unclear <i>or</i> not Sanskrit (English intros, music, silence). Press <b>Ctrl/⌘ + Enter</b> to save &amp; next; replay as often as you need.</div>
+    </div>
+    <div id="finished" class="done" style="display:none">🙏 All clips done — thank you! You can close this tab.</div>
+  </div>
+</div>
+<script>
+const API=location.origin;                 // page is served by the backend, same origin
+let scholar='', cur=null;
+function enter(){ const n=document.getElementById('name').value.trim(); if(!n) return;
+  scholar=n; localStorage.setItem('annot_name',n); start(); }
+function start(){ document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('who').textContent=scholar; next(); }
+async function next(){
+  try{
+    const r=await fetch(API+'/annot/next?scholar='+encodeURIComponent(scholar));
+    const d=await r.json();
+    document.getElementById('prog').textContent=d.done+' / '+d.total+' done';
+    document.getElementById('fill').style.width=(d.total?100*d.done/d.total:0)+'%';
+    if(!d.id){ document.getElementById('stage').style.display='none';
+      document.getElementById('finished').style.display='block'; return; }
+    cur=d.id;
+    document.getElementById('vid').textContent=d.video||'';
+    document.getElementById('dur').textContent=(d.dur?d.dur+'s':'');
+    const au=document.getElementById('au'); au.src=API+d.audio; au.load();
+    try{ await au.play(); }catch(e){}                 // autoplay if the browser allows
+    const t=document.getElementById('txt'); t.value=d.draft||''; t.focus();
+  }catch(e){ document.getElementById('prog').textContent='connection error — retry in a moment'; }
+}
+async function post(unclear){
+  if(!cur) return;
+  const fd=new FormData(); fd.append('id',cur); fd.append('scholar',scholar);
+  fd.append('text',document.getElementById('txt').value.trim()); fd.append('unclear',unclear?'true':'false');
+  await fetch(API+'/annot/save',{method:'POST',body:fd});
+  updateMine(); next();
+}
+function saveNext(){ post(false); }
+function markUnclear(){ post(true); }
+async function updateMine(){
+  try{ const r=await fetch(API+'/annot/progress'); const d=await r.json();
+    document.getElementById('mine').textContent='you: '+(d.by_scholar[scholar]||0); }catch(e){}
+}
+document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){ e.preventDefault(); saveNext(); }});
+(function init(){ const saved=localStorage.getItem('annot_name');
+  if(saved){ scholar=saved; start(); updateMine(); } else document.getElementById('gate').style.display='block'; })();
+</script>
+</body></html>

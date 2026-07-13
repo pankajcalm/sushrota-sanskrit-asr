@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+# data, audio, model weights are not tracked (weights -> Hugging Face)
+*.nemo
+*.pt
+*.pth
+*.wav
+data/
+Data/

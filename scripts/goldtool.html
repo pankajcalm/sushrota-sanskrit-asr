@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="sa">
+<head>
+<meta charset="utf-8"/>
+<meta http-equiv="Cache-Control" content="no-store"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Su-shrotā · Gold transcription</title>
+<style>
+  :root{--bg:#fff;--ink:#1c1917;--muted:#78716c;--line:#ece9e3;--accent:#b4531a;--ok:#2f7d54;--soft:#f7efe4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI",Roboto,"Noto Sans Devanagari",sans-serif;font-size:17px;line-height:1.6}
+  .wrap{max-width:720px;margin:0 auto;padding:24px 18px 60px}
+  h1{font-size:22px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:10px 0 4px}
+  .bar>div{height:100%;background:var(--accent);width:0%}
+  .prog{color:var(--muted);font-size:13px;text-align:right}
+  .card{border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:14px}
+  .cid{color:var(--muted);font-size:12px}
+  audio{width:100%;margin:10px 0}
+  textarea{width:100%;min-height:110px;font-size:22px;font-family:inherit;padding:12px;border:1px solid var(--line);border-radius:10px;resize:vertical}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .blanktag{display:inline-block;font-size:11px;color:#fff;background:var(--muted);border-radius:6px;padding:1px 6px;margin-left:6px}
+  .row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+  button{font-size:15px;padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  button.ghost{color:var(--muted)}
+  .hint{color:var(--muted);font-size:12.5px;margin-top:10px}
+  .done{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>सुश्रोता · Gold transcription</h1>
+  <div class="sub">Play the clip, correct the text to <b>exactly what is spoken</b> (Devanagari, word-spaced). Skip daṇḍas/numbers. If unclear, tap “Mark unclear”.</div>
+  <div class="bar"><div id="fill"></div></div>
+  <div class="prog" id="prog">—</div>
+
+  <div class="card">
+    <div class="cid" id="cid"></div>
+    <audio id="au" controls preload="auto"></audio>
+    <textarea id="txt" spellcheck="false" placeholder="type what you hear…"></textarea>
+    <div class="row">
+      <button class="primary" onclick="saveNext()">Save &amp; next  ⏎</button>
+      <button onclick="prev()">‹ Prev</button>
+      <button onclick="next()">Skip ›</button>
+      <button class="ghost" onclick="markUnclear()">Mark unclear [x]</button>
+      <button class="ghost" onclick="replay()">↺ Replay</button>
+    </div>
+    <div class="hint">Shortcut: <b>Ctrl/Cmd + Enter</b> = Save &amp; next. Blank clips (no pre-fill) are the anchoring check — type from scratch.</div>
+  </div>
+</div>
+<script>
+const API = location.origin;   // served from the backend, same origin
+let clips=[], i=0;
+async function load(){
+  const d = await (await fetch(API+'/gold/manifest')).json();
+  clips = d.clips;
+  // jump to first not-done
+  const f = clips.findIndex(c=>!c.done); i = f<0?0:f;
+  render();
+}
+function render(){
+  if(!clips.length){ document.getElementById('cid').textContent='No clips found.'; return; }
+  const c = clips[i];
+  document.getElementById('cid').innerHTML = `clip ${i+1}/${clips.length} · ${c.id} · ${c.dur||'?'}s` + (c.prefill?'':' <span class="blanktag">blank</span>') + (c.done?' <span class="done">✓ saved</span>':'');
+  const au=document.getElementById('au'); au.src = API + c.audio; au.load();
+  document.getElementById('txt').value = c.saved!=null ? c.saved : (c.prefill||'');
+  const done = clips.filter(x=>x.done).length;
+  document.getElementById('prog').textContent = `${done} / ${clips.length} saved`;
+  document.getElementById('fill').style.width = (100*done/clips.length)+'%';
+  document.getElementById('txt').focus();
+  au.play().catch(()=>{});
+}
+async function save(text){
+  const c=clips[i];
+  const fd=new FormData(); fd.append('id',c.id); fd.append('text',text);
+  try{ await fetch(API+'/gold/save',{method:'POST',body:fd}); c.done=true; c.saved=text; }catch(e){ alert('save failed'); }
+}
+async function saveNext(){ await save(document.getElementById('txt').value.trim()); next(); }
+async function markUnclear(){ await save('[x]'); next(); }
+function next(){ if(i<clips.length-1){ i++; render(); } else { render(); } }
+function prev(){ if(i>0){ i--; render(); } }
+function replay(){ const au=document.getElementById('au'); au.currentTime=0; au.play(); }
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); saveNext(); }});
+load();
+</script>
+</body>
+</html>
