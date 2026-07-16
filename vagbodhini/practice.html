@@ -1,109 +1,159 @@
 <!doctype html>
-<html lang="sa">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Practise Sanskrit chanting at your own pace with metre-aware learning units and syllable-level feedback.">
+<meta name="theme-color" content="#174e3c">
 <title>Vāgbodhinī · Sanskrit chant practice</title>
 <style>
-  :root{--bg:#faf7f2;--card:#fff;--ink:#2a2320;--mut:#8a8079;--line:#e7ded2;
-        --grn:#2e9e5b;--grnbg:#e4f5ea;--amb:#d59320;--ambbg:#fbf1d9;--red:#d94f43;--redbg:#fbe4e2;
-        --accent:#b5461f;--sel:#eef5ff;}
+  :root{
+    --bg:#f4f0e7;--paper:#fffdf8;--paper-2:#faf6ed;--ink:#172923;--mut:#66736d;
+    --line:#ddd8ca;--line-dark:#c8c1b1;--forest:#174e3c;--forest-2:#236b52;
+    --accent:#b94f2c;--accent-2:#d98b4a;--gold:#d8a55b;--shadow:0 24px 70px rgba(35,48,42,.11);
+    --grn:#247a52;--grnbg:#e7f4ec;--amb:#ad7419;--ambbg:#fbf1d8;--red:#bd443a;--redbg:#f9e7e4;
+    --script:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Noto Serif Tamil","Noto Serif Malayalam","Noto Serif Bengali","Noto Sans Grantha","Siddhanta",serif;
+  }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-       background:var(--bg);color:var(--ink);line-height:1.5}
-  .wrap{max-width:820px;margin:0 auto;padding:22px 18px 90px}
-  h1{font-size:22px;margin:0 0 2px;font-weight:700}
-  h1 .en{color:var(--mut);font-weight:500;font-size:15px}
-  .sub{color:var(--mut);font-size:13px;margin:0 0 18px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
-  textarea{width:100%;min-height:84px;border:1px solid var(--line);border-radius:10px;padding:11px;
-           font-size:19px;font-family:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Noto Serif Tamil","Noto Serif Malayalam","Noto Serif Bengali","Noto Sans Grantha","Siddhanta",serif;resize:vertical;color:var(--ink)}
-  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:10px}
-  button{font-size:14px;font-weight:600;border:0;border-radius:9px;padding:9px 15px;cursor:pointer;
-         background:#efe7db;color:var(--ink);transition:.12s}
-  button:hover{filter:brightness(.97)}
-  button.primary{background:var(--accent);color:#fff}
-  button.chant{background:transparent;color:var(--accent);border:1.5px solid var(--accent);border-radius:20px;padding:8px 18px}
-  button.chant:hover{background:var(--accent);color:#fff;filter:none}
-  button.chant.on{background:var(--red);border-color:var(--red);color:#fff;animation:pulse 1s infinite}
-  button.chant::before{content:"●";font-size:10px;margin-right:6px;vertical-align:1px;opacity:.75}
+  html{scroll-behavior:smooth}
+  body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:
+      radial-gradient(circle at 8% 5%,rgba(217,139,74,.13),transparent 29rem),
+      radial-gradient(circle at 92% 22%,rgba(23,78,60,.10),transparent 32rem),var(--bg);
+    color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;z-index:-1;
+    background-image:linear-gradient(rgba(23,41,35,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(23,41,35,.05) 1px,transparent 1px);
+    background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,transparent 72%)}
+  a{color:var(--forest-2);text-underline-offset:3px}
+  button,textarea,select{font:inherit}
+  button{cursor:pointer}
+  button:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid rgba(217,139,74,.38);outline-offset:3px}
+  .shell{max-width:1180px;margin:0 auto;padding:0 28px 80px}
+  .nav{height:86px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(23,41,35,.12)}
+  .brand{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
+  .brand-mark{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--forest);color:#fff;
+    font-family:var(--script);font-size:23px;box-shadow:0 8px 22px rgba(23,78,60,.2)}
+  .brand strong{display:block;font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:20px;letter-spacing:.2px;line-height:1.05}
+  .brand small{display:block;color:var(--mut);font-family:var(--script);font-size:12px;margin-top:3px}
+  .nav-right{display:flex;align-items:center;gap:20px}
+  .nav-link{color:var(--mut);text-decoration:none;font-size:13px;font-weight:650}
+  .status{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,253,248,.72);border:1px solid var(--line);
+    border-radius:999px;color:var(--mut);font-size:12px;font-weight:650;backdrop-filter:blur(10px)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--amb);box-shadow:0 0 0 4px var(--ambbg)}
+  .status.online .status-dot{background:var(--grn);box-shadow:0 0 0 4px var(--grnbg)}
+  .hero{display:grid;grid-template-columns:minmax(0,.88fr) minmax(500px,1.12fr);gap:64px;align-items:center;padding:64px 0 42px}
+  .eyebrow{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:11px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}
+  .eyebrow::before{content:"";width:28px;height:1px;background:var(--accent)}
+  .hero h1{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:clamp(45px,5vw,70px);line-height:.99;
+    letter-spacing:-2.7px;margin:20px 0 24px;font-weight:600;max-width:620px}
+  .hero h1 em{font-weight:500;color:var(--accent);font-style:italic}
+  .hero-copy{font-size:17px;color:var(--mut);max-width:550px;margin:0 0 30px}
+  .journey{display:grid;grid-template-columns:repeat(3,1fr);max-width:540px;border-top:1px solid var(--line-dark);padding-top:18px;gap:14px}
+  .journey-item{display:grid;grid-template-columns:25px 1fr;gap:8px;align-items:start}
+  .journey-n{width:24px;height:24px;border:1px solid var(--line-dark);border-radius:50%;display:grid;place-items:center;color:var(--accent);font-size:10px;font-weight:800}
+  .journey-item strong{display:block;font-size:12px;line-height:1.2}.journey-item span{display:block;color:var(--mut);font-size:11px;margin-top:3px}
+  .mantra{display:flex;align-items:center;gap:12px;margin-top:35px;color:rgba(23,78,60,.56);font-family:var(--script);font-size:14px}
+  .mantra i{width:18px;height:1px;background:var(--gold)}
+  .card{position:relative;background:rgba(255,253,248,.94);border:1px solid rgba(200,193,177,.8);border-radius:26px;padding:30px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--forest),var(--gold),var(--accent))}
+  .card-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:20px}
+  .step-badge{flex:0 0 auto;width:34px;height:34px;border-radius:11px;background:var(--forest);color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}
+  .card-head h2{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:27px;line-height:1.1;margin:0 0 5px;font-weight:600}
+  .card-head p{font-size:13px;color:var(--mut);margin:0}
+  .field-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--forest)}
+  .field-label span{color:var(--mut);font-weight:550;letter-spacing:0;text-transform:none}
+  textarea{width:100%;min-height:150px;border:1px solid var(--line-dark);border-radius:16px;padding:17px 18px;background:#fffefa;
+    font-size:21px;font-family:var(--script);resize:vertical;color:var(--ink);line-height:1.55;transition:border .18s,box-shadow .18s}
+  textarea::placeholder{font-family:Inter,ui-sans-serif,sans-serif;color:#929a95;font-size:15px;line-height:1.45}
+  textarea:focus{border-color:var(--forest-2);box-shadow:0 0 0 4px rgba(35,107,82,.08);outline:0}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
+  button{font-size:14px;font-weight:750;border:0;border-radius:12px;padding:11px 16px;background:#eee9df;color:var(--ink);transition:transform .16s,box-shadow .16s,background .16s}
+  button:hover{transform:translateY(-1px)}button:active{transform:translateY(0)}
+  button.primary{min-height:48px;padding:12px 19px;background:var(--forest);color:#fff;box-shadow:0 10px 25px rgba(23,78,60,.18)}
+  button.primary:hover{background:var(--forest-2);box-shadow:0 13px 29px rgba(23,78,60,.24)}
+  button.primary::after{content:"→";display:inline-block;margin-left:14px;font-size:18px;transition:transform .16s}
+  button.primary:hover::after{transform:translateX(3px)}
   button:disabled{opacity:.45;cursor:not-allowed}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-  .hint{font-size:12.5px;color:var(--mut)}
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-  .seg label{padding:8px 14px;cursor:pointer;font-size:14px;font-weight:600;background:#fff}
-  .seg label.on{background:var(--accent);color:#fff}
-  .seg input{display:none}
-  .metre{font-size:11.5px;color:var(--mut);letter-spacing:.3px;text-transform:uppercase;margin:14px 0 4px}
-  .unit{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;background:var(--card)}
-  .aks{display:flex;flex-wrap:wrap;gap:3px 2px;margin-bottom:8px}
-  .ak{font-family:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Noto Serif Tamil","Noto Serif Malayalam","Noto Serif Bengali","Noto Sans Grantha","Siddhanta",serif;font-size:25px;line-height:1.15;padding:1px 3px;border-radius:6px}
-  .ak.wb{margin-right:9px}
-  .ak.green{background:var(--grnbg);color:var(--grn)}
-  .ak.amber{background:var(--ambbg);color:var(--amb)}
-  .ak.red{background:var(--redbg);color:var(--red)}
-  .uctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .uctl audio{height:34px}
-  .noref{font-size:12.5px;color:var(--mut)}
-  .ures{margin-top:9px;font-size:14px;display:none}
-  .ures .pct{font-size:22px;font-weight:800;margin-right:8px}
-  .ures .heard{font-family:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Noto Serif Tamil","Noto Serif Malayalam","Noto Serif Bengali","Noto Sans Grantha","Siddhanta",serif;font-size:18px;background:#f4eee3;
-               border-radius:7px;padding:4px 8px;margin-top:5px;display:inline-block}
-  .msg{font-size:13px;color:var(--accent);margin-top:8px;min-height:16px}
-  .spin{display:inline-block;width:14px;height:14px;border:2px solid #ccc;border-top-color:var(--accent);
-        border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}
-  @keyframes sp{to{transform:rotate(360deg)}}
-  .detbar{margin-top:10px;padding:10px 12px;background:#f4eee3;border-radius:10px}
-  .detrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
-  select{font-size:14px;font-weight:600;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
-  .echo{margin-top:8px}
-  .elab{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.3px}
-  .etext{font-family:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Siddhanta",serif;
-         font-size:22px;color:var(--ink);margin-top:2px;line-height:1.5}
-  .ok{color:var(--grn);font-weight:600}
-  .cdwrap{text-align:center;padding:6px 0}
-  .cd{font-size:38px;font-weight:800;color:var(--accent);line-height:1}
-  .cdlab{font-size:12px;color:var(--mut)}
-  .recbar{display:flex;align-items:center;gap:8px}
-  .recdot{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}
-  .rectxt{color:var(--red);font-weight:700;font-size:14.5px}
-  .rectime{margin-left:auto;color:var(--mut);font-size:13px;font-variant-numeric:tabular-nums}
-  .meter{height:9px;background:#eadfce;border-radius:5px;margin-top:8px;overflow:hidden}
-  .mfill{height:100%;width:0%;background:linear-gradient(90deg,var(--grn),var(--amb),var(--red));transition:width .07s linear}
-  .compare{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
-  .clab{font-size:12px;color:var(--mut)}
-  .mini{font-size:13px;font-weight:600;padding:6px 11px;border-radius:8px;background:#efe7db;color:var(--ink)}
-  .mini.ovr{background:#e4f5ea;color:var(--grn)}
-  .hdr{text-align:center;margin:6px 0 16px}
-  .hdr h1{font-size:30px;margin:0;letter-spacing:.5px}
-  .hdr .dv{font-family:"Noto Serif Devanagari",serif;font-size:17px;color:var(--accent);margin-top:1px}
-  .tagline{font-size:14.5px;color:var(--ink);margin:9px 0 3px}
-  .author{font-size:12.5px;color:var(--mut);margin:0}
-  .author a{color:var(--mut);text-decoration:none;border-bottom:1px dotted var(--mut)}
-  .samples .stitle{font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin:2px 0 7px}
-  .scard{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 13px;margin-bottom:7px;cursor:pointer;transition:.12s}
-  .scard:hover{border-color:var(--accent);background:#fffaf4}
-  .scard .sm{font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.3px}
-  .scard .sl{font-weight:700;font-size:13.5px;margin:0 0 1px}
-  .scard .sp{font-family:"Noto Serif Devanagari","Noto Serif Kannada","Noto Serif Telugu","Noto Serif Tamil","Noto Serif Malayalam","Siddhanta",serif;
-             font-size:17px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .disclaimer{margin-top:28px;padding-top:13px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mut);text-align:center;line-height:1.5}
-  .genlab{font-size:13px;color:var(--mut);margin-bottom:5px}
-  .limit{color:var(--accent);font-weight:600}
+  .hint{font-size:12px;color:var(--mut)}
+  .detbar{margin-top:13px;padding:13px 15px;background:#edf3ee;border:1px solid #d8e6dc;border-radius:14px}
+  .detrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+  select{font-size:13px;font-weight:700;padding:7px 10px;border:1px solid #cddbd1;border-radius:9px;background:#fff;color:var(--ink)}
+  .echo{margin-top:10px;padding-top:10px;border-top:1px solid #d8e6dc}.elab{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px}
+  .etext{font-family:var(--script);font-size:20px;color:var(--ink);margin-top:3px;line-height:1.5}.ok{color:var(--grn);font-weight:750}
+  .msg{font-size:12.5px;color:var(--accent);margin-top:12px;min-height:18px}.msg:empty{display:none}.msg a{font-weight:750}
+  .genlab{font-size:12px;color:var(--mut);margin-bottom:6px}.limit{color:var(--accent);font-weight:700}
+  .meter{height:8px;background:#e8e1d5;border-radius:99px;margin-top:8px;overflow:hidden}
+  .mfill{height:100%;width:0%;background:linear-gradient(90deg,var(--forest-2),var(--gold),var(--accent));transition:width .07s linear}
+  .samples{padding:28px 0 38px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:14px}
+  .section-head h2{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-size:25px;margin:0;font-weight:600}.section-head p{font-size:12px;color:var(--mut);margin:0}
+  .sample-track{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:12px;overflow-x:auto;padding:2px 2px 14px;scroll-snap-type:x mandatory;scrollbar-color:var(--line-dark) transparent}
+  .scard{scroll-snap-align:start;text-align:left;width:100%;min-height:132px;background:rgba(255,253,248,.78);border:1px solid var(--line);border-radius:18px;padding:17px;margin:0;cursor:pointer;box-shadow:none}
+  .scard:hover{border-color:var(--gold);background:var(--paper);box-shadow:0 12px 30px rgba(35,48,42,.08)}
+  .scard .sm{font-size:9.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.9px;font-weight:800}.scard .sl{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;font-weight:700;font-size:17px;margin:7px 0 5px}
+  .scard .sp{font-family:var(--script);font-size:16px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .workspace{margin-top:8px;scroll-margin-top:20px}.control-deck{display:flex;gap:20px;align-items:flex-end;justify-content:space-between;padding:18px 20px;background:rgba(255,253,248,.86);border:1px solid var(--line);border-radius:20px;margin-bottom:16px;box-shadow:0 12px 35px rgba(35,48,42,.06)}
+  .control-cluster{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.control-label{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:800}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f3eee5;padding:3px;gap:2px}
+  .seg button{border-radius:9px;padding:8px 12px;font-size:12px;background:transparent;color:var(--mut);box-shadow:none}
+  .seg button:hover{transform:none;color:var(--ink)}.seg button.on{background:var(--paper);color:var(--forest);box-shadow:0 3px 10px rgba(34,48,42,.10)}
+  .metre{font-size:10px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;margin:22px 0 8px;font-weight:800}
+  .unit{border:1px solid var(--line);border-radius:22px;padding:22px 24px;margin-bottom:14px;background:rgba(255,253,248,.92);box-shadow:0 10px 35px rgba(35,48,42,.055);transition:border .18s,box-shadow .18s}
+  .unit:hover{border-color:var(--line-dark);box-shadow:0 15px 42px rgba(35,48,42,.085)}
+  .unit-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.unit-index{font-size:10px;font-weight:850;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+  .unit-metre{font-size:10px;color:var(--mut);padding:5px 9px;border-radius:999px;background:var(--paper-2);border:1px solid var(--line)}
+  .aks{display:flex;flex-wrap:wrap;gap:5px 2px;margin-bottom:18px}.ak{font-family:var(--script);font-size:29px;line-height:1.28;padding:2px 4px;border-radius:7px;transition:background .18s,color .18s}
+  .ak.wb{margin-right:10px}.ak.green{background:var(--grnbg);color:var(--grn)}.ak.amber{background:var(--ambbg);color:var(--amb)}.ak.red{background:var(--redbg);color:var(--red)}
+  .uctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:15px;border-top:1px solid var(--line)}.uctl audio{height:38px;max-width:100%}
+  .noref{font-size:11px;color:var(--mut);padding:7px 10px;background:var(--paper-2);border-radius:9px}.noref::before{content:"○";color:var(--amb);margin-right:6px}
+  button.chant{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;padding:10px 18px;box-shadow:0 8px 20px rgba(185,79,44,.17)}
+  button.chant:hover{background:#a54224;box-shadow:0 11px 24px rgba(185,79,44,.24)}button.chant.on{background:var(--red);animation:pulse 1s infinite}
+  button.chant::before{content:"●";font-size:9px;margin-right:7px;vertical-align:1px;opacity:.8}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.58}}
+  .ures{margin-top:14px;padding:15px;border-radius:14px;background:var(--paper-2);font-size:13px;display:none}.ures .pct{font-size:26px;font-weight:850;margin-right:9px}
+  .ures .heard{font-family:var(--script);font-size:18px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:6px 9px;margin-top:5px;display:inline-block}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #ccc;border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes sp{to{transform:rotate(360deg)}}
+  .cdwrap{text-align:center;padding:8px 0}.cd{font-family:"Iowan Old Style",Georgia,serif;font-size:42px;font-weight:700;color:var(--accent);line-height:1}.cdlab{font-size:11px;color:var(--mut)}
+  .recbar{display:flex;align-items:center;gap:8px}.recdot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--red);animation:pulse 1s infinite}.rectxt{color:var(--red);font-weight:750;font-size:14px}.rectime{margin-left:auto;color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
+  .compare{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}.clab{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--mut)}
+  .mini{font-size:12px;font-weight:700;padding:7px 11px;border-radius:9px;background:#eae4d9;color:var(--ink);box-shadow:none}.mini.ovr{background:var(--grnbg);color:var(--grn)}
+  .footer{display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;margin-top:38px;padding:24px 0 0;border-top:1px solid var(--line);color:var(--mut);font-size:11px}.footer strong{display:block;color:var(--ink);font-size:12px;margin-bottom:2px}.footer-mark{font-family:var(--script);font-size:22px;color:var(--accent)}
+  @media(max-width:1040px){.hero{grid-template-columns:1fr;gap:36px;padding-top:45px}.hero-copy{max-width:680px}.hero h1{max-width:760px}.card{max-width:720px}.nav-link{display:none}.control-deck{align-items:flex-start;flex-direction:column}}
+  @media(max-width:620px){.shell{padding:0 16px 54px}.nav{height:72px}.brand-mark{width:37px;height:37px}.brand strong{font-size:18px}.status{padding:7px 9px;max-width:170px}.status span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hero{padding:36px 0 24px}.hero h1{font-size:43px;letter-spacing:-1.7px;margin:16px 0 18px}.hero-copy{font-size:15px}.journey{gap:7px}.journey-item{grid-template-columns:1fr}.journey-n{margin-bottom:3px}.card{padding:22px 18px;border-radius:21px}.card-head h2{font-size:24px}textarea{min-height:135px;font-size:19px}.row button.primary{width:100%}.row .hint{text-align:center;width:100%}.samples{padding-top:18px}.section-head{align-items:start;flex-direction:column;gap:3px}.sample-track{grid-auto-columns:82%}.control-deck{padding:15px;gap:14px}.control-cluster{align-items:flex-start;flex-direction:column;width:100%}.seg{width:100%}.seg button{flex:1;padding:8px 6px}.unit{padding:18px 16px}.ak{font-size:25px}.uctl{align-items:stretch}.uctl audio{width:100%}button.chant{margin-left:0}.footer{grid-template-columns:1fr}.footer-mark{display:none}}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="hdr">
-    <h1>Vāgbodhinī</h1>
-    <div class="dv">वाग्बोधिनी</div>
-    <p class="tagline">A vṛtta (metre) aware śloka-to-chant text-to-speech system for Sanskrit</p>
-    <p class="author">Prof. Prathosh A P · Indian Institute of Science, Bengaluru</p>
-  </div>
-  <p class="sub">Paste a śloka in any script, hear the reference chant, then chant along for per-syllable feedback.</p>
+<div class="shell">
+  <header class="nav">
+    <a class="brand" href="#" aria-label="Vāgbodhinī home">
+      <span class="brand-mark" aria-hidden="true">व</span>
+      <span><strong>Vāgbodhinī</strong><small>वाग्बोधिनी · chant practice</small></span>
+    </a>
+    <div class="nav-right">
+      <a class="nav-link" href="#samples">Sample verses</a>
+      <a class="nav-link" href="#practice">Practice</a>
+      <div class="status" id="serviceState" role="status"><span class="status-dot"></span><span>Checking practice engine…</span></div>
+    </div>
+  </header>
 
-  <div class="card">
-    <textarea id="txt" placeholder="Paste a śloka in any script — Devanāgarī, Kannada, Telugu, Tamil, Malayalam, Grantha, or Roman (IAST/HK/ITRANS). Keep the daṇḍas (। ॥)."></textarea>
+  <main>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-intro">
+      <div class="eyebrow">Metre-aware Sanskrit learning</div>
+      <h1 id="hero-title">Find the rhythm.<br><em>Hear every syllable.</em></h1>
+      <p class="hero-copy">A focused chant companion for students and scholars. Bring any śloka, practise it at your pace, and receive clear akṣara-by-akṣara feedback.</p>
+      <div class="journey" aria-label="How it works">
+        <div class="journey-item"><span class="journey-n">01</span><div><strong>Paste</strong><span>Any supported script</span></div></div>
+        <div class="journey-item"><span class="journey-n">02</span><div><strong>Practise</strong><span>Pāda, ardha, or full</span></div></div>
+        <div class="journey-item"><span class="journey-n">03</span><div><strong>Refine</strong><span>Syllable-level guidance</span></div></div>
+      </div>
+      <div class="mantra" aria-hidden="true"><span>श्रुति</span><i></i><span>लय</span><i></i><span>अभ्यास</span></div>
+    </div>
+
+    <div class="card" id="practice">
+      <div class="card-head"><span class="step-badge">01</span><div><h2>Begin with a śloka</h2><p>We identify the script and shape the verse into natural learning units.</p></div></div>
+      <label class="field-label" for="txt">Your verse <span>Keep the daṇḍas · । ॥</span></label>
+      <textarea id="txt" aria-describedby="ghint" placeholder="Paste in Devanāgarī, Kannada, Telugu, Tamil, Malayalam, Grantha, IAST, HK, ITRANS, or SLP1…"></textarea>
     <div class="detbar" id="detbar" style="display:none">
       <div class="detrow">
         <span>Detected script:</span>
@@ -114,35 +164,32 @@
         <div class="etext" id="echo"></div></div>
     </div>
     <div class="row">
-      <button class="primary" id="go">Prepare &amp; generate</button>
-      <span class="hint" id="ghint">Splits pādas by metre and synthesises reference chants for all levels.</span>
+      <button type="button" class="primary" id="go">Prepare my practice</button>
+      <span class="hint" id="ghint">Metre analysis · three learning levels</span>
     </div>
     <div class="msg" id="msg"></div>
   </div>
+  </section>
 
-  <div class="samples" id="samples"></div>
+  <section class="samples" id="samples"></section>
 
-  <div class="row" id="levelbar" style="display:none;margin:0 0 6px">
-    <span class="hint">Practise by:</span>
-    <span class="seg" id="gran">
-      <label class="on" data-lv="pada">Pāda (¼)</label>
-      <label data-lv="ardha">Ardha (½)</label>
-      <label data-lv="full">Full śloka</label>
-    </span>
-    <span class="hint" style="margin-left:10px">Feedback:</span>
-    <span class="seg" id="strictsel" title="Strict: every syllable must be recognised. Liberal: flag only clear mistakes.">
-      <label class="on" data-m="strict">Be-strict</label>
-      <label data-m="liberal">Be-liberal</label>
-    </span>
-    <span class="hint" style="margin-left:10px">Speed:</span>
-    <span class="seg" id="speedsel" title="Reference chant playback speed">
-      <label data-s="0.75">0.75×</label>
-      <label class="on" data-s="1">1×</label>
-      <label data-s="1.25">1.25×</label>
-    </span>
-  </div>
-  <div id="units"></div>
-  <div class="disclaimer">By using this service you are consenting for usage of this data for improving the model.</div>
+  <section class="workspace" aria-label="Chant practice workspace">
+    <div class="control-deck" id="levelbar" style="display:none">
+      <div class="control-cluster"><span class="control-label">Learning unit</span><span class="seg" id="gran" role="group" aria-label="Learning unit size">
+        <button type="button" class="on" data-lv="pada" aria-pressed="true">Pāda · ¼</button><button type="button" data-lv="ardha" aria-pressed="false">Ardha · ½</button><button type="button" data-lv="full" aria-pressed="false">Full śloka</button>
+      </span></div>
+      <div class="control-cluster"><span class="control-label">Feedback</span><span class="seg" id="strictsel" role="group" aria-label="Feedback style" title="Precise: every syllable must be recognised. Encouraging: flag only clear mistakes.">
+        <button type="button" class="on" data-m="strict" aria-pressed="true">Precise</button><button type="button" data-m="liberal" aria-pressed="false">Encouraging</button>
+      </span></div>
+      <div class="control-cluster"><span class="control-label">Playback</span><span class="seg" id="speedsel" role="group" aria-label="Reference playback speed" title="Reference chant playback speed">
+        <button type="button" data-s="0.75" aria-pressed="false">0.75×</button><button type="button" class="on" data-s="1" aria-pressed="true">1×</button><button type="button" data-s="1.25" aria-pressed="false">1.25×</button>
+      </span></div>
+    </div>
+    <div id="units"></div>
+  </section>
+  </main>
+
+  <footer class="footer"><div><strong>Designed for attentive Sanskrit practice</strong>With consent, high-quality attempts may help improve the underlying speech model. Prof. Prathosh A P · Indian Institute of Science, Bengaluru.</div><div class="footer-mark">वाग्बोधिनी</div></footer>
 </div>
 
 <script>
@@ -151,17 +198,23 @@ let UNITS=[], rec=null, chunks=[], stream=null, recUnit=-1;
 const $=id=>document.getElementById(id);
 let LEVELS={}, curLevel="pada", curScript="devanagari", curMode="strict", curSpeed=1, detT=null, pickerReady=false;
 
-document.querySelectorAll("#gran label").forEach(l=>l.onclick=()=>{
-  document.querySelectorAll("#gran label").forEach(x=>x.classList.remove("on")); l.classList.add("on");
+function selectSegment(group, selected){
+  document.querySelectorAll(group+" button").forEach(x=>{
+    const active=x===selected; x.classList.toggle("on",active); x.setAttribute("aria-pressed",String(active));
+  });
+}
+
+document.querySelectorAll("#gran button").forEach(l=>l.onclick=()=>{
+  selectSegment("#gran",l);
   curLevel=l.dataset.lv; UNITS=LEVELS[curLevel]||[]; renderUnits();
 });
-document.querySelectorAll("#strictsel label").forEach(l=>l.onclick=()=>{
-  document.querySelectorAll("#strictsel label").forEach(x=>x.classList.remove("on")); l.classList.add("on");
+document.querySelectorAll("#strictsel button").forEach(l=>l.onclick=()=>{
+  selectSegment("#strictsel",l);
   curMode=l.dataset.m;
   Object.keys(lastBlob).forEach(ui=>score(+ui,lastBlob[ui]));   // re-judge current attempts under new mode
 });
-document.querySelectorAll("#speedsel label").forEach(l=>l.onclick=()=>{
-  document.querySelectorAll("#speedsel label").forEach(x=>x.classList.remove("on")); l.classList.add("on");
+document.querySelectorAll("#speedsel button").forEach(l=>l.onclick=()=>{
+  selectSegment("#speedsel",l);
   curSpeed=parseFloat(l.dataset.s);
   document.querySelectorAll("#units audio").forEach(a=>{ a.preservesPitch=true; a.playbackRate=curSpeed; });
 });
@@ -175,11 +228,13 @@ const SAMPLES=[
   {sl:"Sarasvatī vandana",sm:"anuṣṭubh · Telugu తెలుగు",text:"సరస్వతి నమస్తుభ్యం వరదే కామరూపిణి ।\nవిద్యారమ్భం కరిష్యామి సిద్ధిర్భవతు మే సదా ॥"},
 ];
 function renderSamples(){
-  const box=$("samples"); box.innerHTML='<div class="stitle">Try a sample</div>';
-  SAMPLES.forEach(s=>{ const d=document.createElement("div"); d.className="scard";
+  const box=$("samples"); box.innerHTML='<div class="section-head"><div><div class="eyebrow">A gentle place to begin</div><h2>Explore a sample verse</h2></div><p>Choose one to fill the practice studio instantly.</p></div><div class="sample-track" id="sampleTrack"></div>';
+  const track=$("sampleTrack");
+  SAMPLES.forEach(s=>{ const d=document.createElement("button"); d.type="button"; d.className="scard";
+    d.setAttribute("aria-label","Try sample: "+s.sl);
     d.innerHTML='<div class="sm">'+s.sm+'</div><div class="sl">'+s.sl+'</div><div class="sp">'+s.text.split("\n")[0]+'</div>';
-    d.onclick=()=>{ $("txt").value=s.text; $("samples").style.display="none"; runDetect(); window.scrollTo({top:0,behavior:"smooth"}); };
-    box.appendChild(d); });
+    d.onclick=()=>{ $("txt").value=s.text; $("samples").style.display="none"; runDetect(); $("practice").scrollIntoView({behavior:"smooth",block:"center"}); };
+    track.appendChild(d); });
 }
 
 // ---- live script detection + confirmation echo ----
@@ -202,13 +257,14 @@ $("scriptsel").onchange=()=>runDetect($("scriptsel").value);
 
 $("go").onclick = async () => {
   const text=$("txt").value.trim(); if(!text) return;
+  const go=$("go"); go.disabled=true; go.textContent="Preparing…";
   $("units").innerHTML=""; $("levelbar").style.display="none";
   $("msg").innerHTML='<div class="genlab" id="genlab">Preparing…</div><div class="meter"><div class="mfill" id="genfill"></div></div>';
   const fd=new FormData(); fd.append("text",text); fd.append("script",curScript);
   let resp; try{ resp=await fetch(API+"/generate",{method:"POST",body:fd}); }
-  catch(e){ $("msg").textContent="Generation failed."; return; }
+  catch(e){ $("msg").textContent="Generation failed."; go.disabled=false; go.textContent="Prepare my practice"; return; }
   if(!resp.ok){ let m="Generation failed."; try{ const j=await resp.json(); m=j.message||j.error||m; }catch(e){}
-    $("msg").innerHTML='<div class="limit">'+m+'</div>'; return; }
+    $("msg").innerHTML='<div class="limit">'+m+'</div>'; go.disabled=false; go.textContent="Prepare my practice"; return; }
   const reader=resp.body.getReader(), dec=new TextDecoder(); let buf="", remaining=null;
   const setp=(d,t)=>{ const f=$("genfill"); if(f) f.style.width=(t?Math.round(100*d/t):0)+"%";
     const l=$("genlab"); if(l) l.textContent="Synthesising reference chants… "+d+" / "+t; };
@@ -226,9 +282,11 @@ $("go").onclick = async () => {
           +'<a href="https://huggingface.co/spaces/prathoshap/vagdhenu-demo" target="_blank" rel="noopener">Open the online Vāgdhenu demo ↗</a>';
         if(ev.tts_ok && remaining!=null) note='<span style="color:var(--mut);font-size:12px">'+remaining+' ślokas left today</span>';
         $("msg").innerHTML=note; $("levelbar").style.display="flex"; renderUnits();
+        go.disabled=false; go.textContent="Prepare my practice";
+        requestAnimationFrame(()=>$("levelbar").scrollIntoView({behavior:"smooth",block:"start"}));
       }
     }
-  } }catch(e){ $("msg").textContent="Generation interrupted."; }
+  } }catch(e){ $("msg").textContent="Generation interrupted."; go.disabled=false; go.textContent="Prepare my practice"; }
 };
 
 function renderUnits(){
@@ -239,15 +297,20 @@ function renderUnits(){
     if(u.verse!==curVerse){ curVerse=u.verse;
       if(nVerses>1){ const m=document.createElement("div"); m.className="metre"; m.textContent="Verse "+(u.verse+1); box.appendChild(m); } }
     const card=document.createElement("div"); card.className="unit";
+    const hd=document.createElement("div"); hd.className="unit-head";
+    const ix=document.createElement("span"); ix.className="unit-index";
+    ix.textContent=(curLevel==="pada"?"Pāda":curLevel==="ardha"?"Ardha":"Full śloka")+" "+String(ui+1).padStart(2,"0");
+    const mt=document.createElement("span"); mt.className="unit-metre"; mt.textContent=u.metre||"Sanskrit";
+    hd.appendChild(ix); hd.appendChild(mt);
     const aks=document.createElement("div"); aks.className="aks"; aks.id="aks-"+ui;
     u.aksharas.forEach(a=>{ const e=document.createElement("span"); e.className="ak"+(a.word_end?" wb":""); e.textContent=a.disp||a.text; aks.appendChild(e); });
     const ctl=document.createElement("div"); ctl.className="uctl";
     if(u.wav_url){ const au=document.createElement("audio"); au.controls=true; au.src=u.wav_url; au.preservesPitch=true; au.playbackRate=curSpeed; ctl.appendChild(au); }
     else { const n=document.createElement("span"); n.className="noref"; n.textContent="(no reference audio)"; ctl.appendChild(n); }
-    const b=document.createElement("button"); b.className="chant"; b.textContent="Chant"; b.dataset.i=ui;
+    const b=document.createElement("button"); b.type="button"; b.className="chant"; b.textContent="Start chanting"; b.dataset.i=ui;
     b.onclick=()=>toggleRec(ui,b); ctl.appendChild(b);
     const res=document.createElement("div"); res.className="ures"; res.id="ures-"+ui;
-    card.appendChild(aks); card.appendChild(ctl); card.appendChild(res); box.appendChild(card);
+    card.appendChild(hd); card.appendChild(aks); card.appendChild(ctl); card.appendChild(res); box.appendChild(card);
   });
 }
 
@@ -266,7 +329,7 @@ function toggleRec(ui,btn){
         const mf=$("mf-"+ui); if(mf) mf.style.width=Math.min(100,Math.sqrt(sum/d.length)*400)+"%";
         if(rec.collecting) chunks.push(new Float32Array(d));   // discard warm-up/countdown audio
       };
-      btn.classList.add("on"); btn.textContent="Stop";
+      btn.classList.add("on"); btn.textContent="Stop recording";
       const ind=$("ures-"+ui); ind.style.display="block"; countdown(ui,3);
    }).catch(()=>{ $("msg").textContent="Microphone permission needed."; });
 }
@@ -295,7 +358,7 @@ function stopRec(){
   clearTimeout(rec.cdT); clearTimeout(rec.startT); clearInterval(rec.timer);
   const {ctx,proc,src,sr,collecting}=rec; proc.disconnect(); src.disconnect(); try{ctx.close()}catch(e){}
   stream.getTracks().forEach(t=>t.stop());
-  const ui=recUnit; const btn=document.querySelector('.chant[data-i="'+ui+'"]'); if(btn){btn.classList.remove("on"); btn.textContent="Chant";}
+  const ui=recUnit; const btn=document.querySelector('.chant[data-i="'+ui+'"]'); if(btn){btn.classList.remove("on"); btn.textContent="Start chanting";}
   const wasCollecting=collecting; rec=null;
   if(!wasCollecting){ $("ures-"+ui).style.display="none"; return; }   // stopped mid-countdown -> cancel
   let n=0; chunks.forEach(c=>n+=c.length);
@@ -357,7 +420,18 @@ async function saidRight(ui){
     fetch(API+"/feedback",{method:"POST",body:fd});
   }catch(e){}
 }
+async function loadHealth(){
+  const el=$("serviceState");
+  try{
+    const j=await (await fetch(API+"/health")).json();
+    if(j.status!=="ok") throw new Error("unavailable");
+    el.classList.add("online");
+    el.querySelector("span:last-child").textContent=j.tts?"Scoring & reference voice online":"Scoring engine online";
+    el.title=j.tts?"ASR scoring and Vāgdhenu reference audio are ready":"ASR scoring is ready; reference audio is available through the online demo";
+  }catch(e){ el.querySelector("span:last-child").textContent="Practice engine unavailable"; }
+}
 renderSamples();
+loadHealth();
 </script>
 </body>
 </html>
