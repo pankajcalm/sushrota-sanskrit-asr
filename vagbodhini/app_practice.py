@@ -20,7 +20,17 @@ import nemo.collections.asr as nemo_asr
 from indic_transliteration import sanscript, detect
 from indic_transliteration.sanscript import transliterate
 
-ROOT = "/home/ece/BigDisk/Prathosh/ASR"
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.abspath(os.environ.get("SUSHROTA_ROOT", REPO_ROOT))
+MODEL_PATH = os.path.abspath(os.environ.get(
+    "SUSHROTA_MODEL", os.path.join(ROOT, "models", "sushrota_sanskrit_asr_v5.nemo")
+))
+if not os.path.isfile(MODEL_PATH):
+    raise SystemExit(
+        f"Sushrota model not found: {MODEL_PATH}\n"
+        "Download it with: hf download prathoshap/sushrota-sanskrit-asr "
+        "sushrota_sanskrit_asr_v5.nemo --local-dir models"
+    )
 OFF, V, BL = 4096, 256, 5632
 NEG = -1e30
 DEV = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -79,10 +89,31 @@ def is_base(ch):
     return (0x0905 <= o <= 0x0939) or (0x0958 <= o <= 0x0961) or (0x0972 <= o <= 0x097F)
 
 print("[boot] loading v5 on", DEV, flush=True)
+_model_cfg = nemo_asr.models.EncDecHybridRNNTCTCBPEModel.restore_from(
+    MODEL_PATH, return_config=True
+)
+# The released v5 archive uses the older name "multilingual" for NeMo's aggregate tokenizer.
+# Current NeMo releases call the same tokenizer layout "agg".
+if str(_model_cfg.tokenizer.get("type", "")).lower() == "multilingual":
+    _model_cfg.tokenizer.type = "agg"
+# AI4Bharat's training fork accepted these multilingual-softmax flags. They are not constructor
+# arguments in upstream NeMo 2.7; removing them preserves the encoder/CTC architecture used here.
+_model_cfg.decoder.pop("multisoftmax", None)
+_model_cfg.joint.pop("multilingual", None)
+_model_cfg.joint.pop("language_keys", None)
+_model_cfg.aux_ctc.decoder.pop("multisoftmax", None)
 M = nemo_asr.models.EncDecHybridRNNTCTCBPEModel.restore_from(
-    f"{ROOT}/exp/ft_ctc_v5/ft_ctc_ep20.nemo", map_location=DEV).eval()
+    MODEL_PATH, override_config_path=_model_cfg, map_location=DEV, strict=False).eval()
 SUB = M.tokenizer.tokenizers_dict["sa"]
-LAB = json.load(open(f"{ROOT}/data/eval_logits/labels.json"))   # col i (1..256) -> LAB[i-1]
+_labels_path = os.path.join(ROOT, "data", "eval_logits", "labels.json")
+if os.path.exists(_labels_path):
+    with open(_labels_path, encoding="utf-8") as f:
+        LAB = json.load(f)                                      # col i (1..256) -> LAB[i-1]
+else:
+    # The released .nemo archive embeds the Sanskrit SentencePiece tokenizer, so a separate
+    # experiment-time labels.json is unnecessary for serving.
+    LAB = SUB.ids_to_tokens(list(range(V)))
+    print(f"[boot] {_labels_path} not found; using labels embedded in the model", flush=True)
 # Representational-invariance for GOP: the target token's effective posterior is the MAX over
 # an equivalence set, so the model's arbitrary spelling of the SAME sound never costs the learner.
 #  (a) word-boundary: word-initial ▁प == mid-word प.
@@ -131,6 +162,14 @@ NAMES = {"devanagari": "Devanāgarī", "kannada": "Kannada ಕನ್ನಡ", "te
 ROMAN_IDS = {"iast", "itrans", "hk", "slp1", "kolkata", "velthuis"}
 # scripts offered in the override picker (skip near-duplicate roman variants)
 PICKER = [i for i in SCHEME if i not in ("kolkata", "velthuis")]
+INDIC_BLOCKS = {
+    "devanagari": (0x0900, 0x097F), "bengali": (0x0980, 0x09FF),
+    "gurmukhi": (0x0A00, 0x0A7F), "gujarati": (0x0A80, 0x0AFF),
+    "oriya": (0x0B00, 0x0B7F), "tamil": (0x0B80, 0x0BFF),
+    "telugu": (0x0C00, 0x0C7F), "kannada": (0x0C80, 0x0CFF),
+    "malayalam": (0x0D00, 0x0D7F), "sinhala": (0x0D80, 0x0DFF),
+    "grantha": (0x11300, 0x1137F),
+}
 
 def detect_script_id(text):
     """Best-guess script id. Latin letters => a Roman scheme; else an Indic block; fallbacks safe."""
@@ -138,6 +177,12 @@ def detect_script_id(text):
         try: s = str(detect.detect(re.sub(r'[।॥\s]+', ' ', text))).lower()
         except Exception: s = "iast"
         return s if (s in SCHEME and s in ROMAN_IDS) else "iast"
+    # Unicode blocks are unambiguous and more reliable than statistical detection for short
+    # verses. Count them so punctuation or a stray foreign character cannot win.
+    counts = {sid: sum(lo <= ord(ch) <= hi for ch in text)
+              for sid, (lo, hi) in INDIC_BLOCKS.items() if sid in SCHEME}
+    if counts and max(counts.values()) > 0:
+        return max(counts, key=counts.get)
     try: s = str(detect.detect(text)).lower()
     except Exception: s = "devanagari"
     return s if s in SCHEME else "devanagari"
@@ -537,7 +582,8 @@ async def feedback(audio: UploadFile = File(...), reference: str = Form(""), hea
 
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return open(os.path.join(os.path.dirname(__file__), "practice.html")).read()
+    with open(os.path.join(os.path.dirname(__file__), "practice.html"), encoding="utf-8") as f:
+        return f.read()
 
 if __name__ == "__main__":
     import uvicorn

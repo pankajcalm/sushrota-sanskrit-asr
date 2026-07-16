@@ -1,5 +1,7 @@
 __pycache__/
 *.pyc
+.venv/
+.venv-*/
 .DS_Store
 # data, audio, model weights are not tracked (weights -> Hugging Face)
 *.nemo

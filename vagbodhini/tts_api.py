@@ -9,18 +9,36 @@ invalid/unknown meter hint falls back to the model's own detector, then a neutra
 Run:  cd /home/ece/Prathosh/vagdhenu_serve && CUDA_VISIBLE_DEVICES=1 ./venv/bin/python tts_api.py
 """
 import os, sys, io, json, time
-HERE = "/home/ece/Prathosh/vagdhenu_serve"; SRC = os.path.join(HERE, "src"); sys.path.insert(0, SRC)
+THIS_REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.abspath(os.environ.get(
+    "VAGDHENU_HOME", os.path.join(os.path.dirname(THIS_REPO), "vagdhenu")
+))
+SRC = os.path.join(HERE, "src")
+sys.path.insert(0, SRC)
+sys.path.insert(0, os.path.join(HERE, "BigVGAN"))
 import numpy as np, soundfile as sf
 from fastapi import FastAPI, Form
 from fastapi.responses import Response, JSONResponse
-from render_core import Renderer, detect_meter_key
+try:
+    from render_core import Renderer, detect_meter_key
+except ModuleNotFoundError as e:
+    if e.name == "render_core":
+        raise SystemExit(
+            f"Vāgdhenu source not found under {HERE}. Clone and set up "
+            "https://github.com/prathoshap/vagdhenu, then set VAGDHENU_HOME to that directory."
+        ) from e
+    raise
 
-BANK = os.path.join(SRC, "reference_bank", "bank.json")
-VOCAB = os.path.join(SRC, "reference_bank", "vocab.txt")
-VOICE = os.path.join(HERE, "weights", "voice_steer.pt")
-VOC = "/home/ece/Prathosh/CHAMPION_2026-06-11/voc_bigvgan_EMA_2026-06-11.pth"
+BANK = os.environ.get("VAGDHENU_BANK", os.path.join(SRC, "reference_bank", "bank.json"))
+VOCAB = os.environ.get("VAGDHENU_VOCAB", os.path.join(SRC, "reference_bank", "vocab.txt"))
+VOICE = os.environ.get("VAGDHENU_VOICE", os.path.join(HERE, "models", "voice_steer_ema_2026-06-17.pt"))
+VOC = os.environ.get("VAGDHENU_VOCODER", os.path.join(HERE, "models", "voc_bigvgan_EMA_2026-06-11.pth"))
 NFE = int(os.environ.get("VAGDHENU_NFE", "32"))
 PORT = int(os.environ.get("TTS_PORT", "8020"))
+
+_missing = [p for p in (BANK, VOCAB, VOICE, VOC) if not os.path.isfile(p)]
+if _missing:
+    raise SystemExit("Vāgdhenu setup is incomplete; missing:\n  " + "\n  ".join(_missing))
 
 print(f"[boot] loading Renderer (nfe={NFE}) …", flush=True)
 t0 = time.time()

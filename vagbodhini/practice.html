@@ -222,7 +222,8 @@ $("go").onclick = async () => {
       else if(ev.type==="progress"){ setp(ev.done,ev.total); }
       else if(ev.type==="done"){
         LEVELS=ev.levels; UNITS=LEVELS[curLevel]||[];
-        let note = ev.tts_ok ? "" : '⚠️ Reference audio unavailable (TTS offline) — you can still chant & get feedback.';
+        let note = ev.tts_ok ? "" : '⚠️ Reference audio unavailable (local TTS requires NVIDIA CUDA) — you can still chant & get feedback. '
+          +'<a href="https://huggingface.co/spaces/prathoshap/vagdhenu-demo" target="_blank" rel="noopener">Open the online Vāgdhenu demo ↗</a>';
         if(ev.tts_ok && remaining!=null) note='<span style="color:var(--mut);font-size:12px">'+remaining+' ślokas left today</span>';
         $("msg").innerHTML=note; $("levelbar").style.display="flex"; renderUnits();
       }
